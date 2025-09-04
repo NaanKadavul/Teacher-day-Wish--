@@ -140,8 +140,8 @@
 
           <!-- Hidden iframe for song playback -->
           <div style="margin-top:18px">
-            <!-- I chose a melodic Tamil song on YouTube. If you'd like a different song tell me and I'll swap the ID. -->
-            <iframe id="songIframe" width="100%" height="166" src="https://www.youtube.com/embed/GVxTYU1R_2Y?enablejsapi=1&rel=0&controls=1" title="Tamil Song" frameborder="0" allow="encrypted-media; autoplay; clipboard-write" allowfullscreen></iframe>
+            <!-- Updated with new Tamil song link -->
+            <iframe id="songIframe" width="100%" height="166" src="https://www.youtube.com/embed/VWifDN4yWjo?enablejsapi=1&rel=0&controls=1" title="Tamil Song" frameborder="0" allow="encrypted-media; autoplay; clipboard-write" allowfullscreen></iframe>
           </div>
 
         </div>
@@ -248,7 +248,6 @@
     // Play the song via postMessage to YouTube iframe player API
     function playSong(){
       try{
-        // send play command — will work if YouTube allows
         songIframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
       }catch(e){
         // ignore
@@ -257,62 +256,12 @@
 
     playSongInline.addEventListener('click', ()=>{
       playSong();
-      // also visually confirm
       playSongInline.textContent = 'Playing...';
       setTimeout(()=>playSongInline.textContent = 'Play Tamil Song', 1800);
     });
 
-    // Download the final HTML by capturing the current page's outerHTML and embedding the name
     downloadBtn.addEventListener('click', ()=>{
       const name = (nameInput.value || '').trim() || 'Friend';
+      const standalone = `<!doctype html>\n<html lang=\"ta\">\n<head>\n<meta charset=\"utf-8\"/>\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>Happy Teacher's Day</title>\n<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&family=Poppins:wght@300;500;700&display=swap\" rel=\"stylesheet\">\n<style>body{margin:0;font-family:\'Poppins\',\'Noto Sans Tamil\',sans-serif;background:linear-gradient(120deg,#0f172a,#7c3aed);color:#111;display:flex;align-items:center;justify-content:center;height:100vh} .card{width:min(920px,94%);border-radius:16px;padding:30px;background:linear-gradient(180deg,#fff 0%, #fff 12%);border:6px solid #fbbf24;box-shadow:0 30px 80px rgba(12,12,
 
-      // Build a minimal standalone HTML file that shows the final card and autoplay the song
-      const standalone = `<!doctype html>\n<html lang="ta">\n<head>\n<meta charset="utf-8"/>\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>Happy Teacher's Day</title>\n<link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&family=Poppins:wght@300;500;700&display=swap\" rel=\"stylesheet\">\n<style>body{margin:0;font-family:\'Poppins\',\'Noto Sans Tamil\',sans-serif;background:linear-gradient(120deg,#0f172a,#7c3aed);color:#111;display:flex;align-items:center;justify-content:center;height:100vh} .card{width:min(920px,94%);border-radius:16px;padding:30px;background:linear-gradient(180deg,#fff 0%, #fff 12%);border:6px solid #fbbf24;box-shadow:0 30px 80px rgba(12,12,16,0.6)} .badge{background:linear-gradient(90deg,#ef4444,#f97316);color:#fff;padding:8px 12px;border-radius:10px;font-weight:700} h1{margin:8px 0;font-size:34px} .name-big{font-size:44px;color:#b45309;font-weight:800;margin-top:10px} p{color:#334155}</style>\n</head>\n<body>\n<div class=\"card\">\n<div style=\"display:flex;align-items:center;gap:12px\">\n<div class=\"badge\">🌟 ஆசிரியர் தினம்</div>\n<div>\n<h1>Happy Teacher's Day</h1>\n<p>எங்கள் வாழ்வில் ஒளி பாயசெய்த ஆசிரியருக்கு நன்றி</p>\n<div class=\"name-big\">${escapeHtml(name)}</div>\n</div>\n</div>\n<div style=\"margin-top:18px;color:#334155\">அன்பே ஆசிரியரே, உங்களின் வழிநடத்தல், பொறுமை மற்றும் அறிவு எங்கள் வாழ்வை நன்றாக மாற்றியது. நன்றி!</div>\n<div style=\"margin-top:18px\">\n<!-- Embedded YouTube -->\n<iframe width=\"100%\" height=\"200\" src=\"https://www.youtube.com/embed/GVxTYU1R_2Y?rel=0&autoplay=1&controls=1\" frameborder=\"0\" allow=\"autoplay; encrypted-media; fullscreen\"></iframe>\n</div>\n</div>\n</body>\n</html>`;
-
-      const blob = new Blob([standalone], {type: 'text/html'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Happy-Teachers-Day-${name.replace(/\s+/g,'-')}.html`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    });
-
-    // simple escape for inserted name in generated HTML
-    function escapeHtml(s){ return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;"); }
-
-    // Share button — create a blob URL and copy to clipboard then give user instructions to share the file
-    shareBtn.addEventListener('click', async ()=>{
-      const name = (nameInput.value || '').trim() || 'Friend';
-      // Build same standalone content
-      const content = `<!doctype html>\n<html><body><h1>Happy Teacher's Day</h1><p>${escapeHtml(name)}</p></body></html>`;
-      const blob = new Blob([content], {type:'text/html'});
-      const url = URL.createObjectURL(blob);
-      try{
-        await navigator.clipboard.writeText(url);
-        alert('A temporary shareable file URL was copied to your clipboard. Paste and share it. Note: this link only works on your computer until you upload the file to Drive/GitHub.');
-      }catch(e){
-        alert('Could not copy automatically. Use the Download button and upload the file to share.');
-      }
-    });
-
-    // Attempt to warm up YouTube player (youTube API commands require enablejsapi=1 in src)
-    // The iframe has enablejsapi=1; postMessage commands are used above
-
-    // Small UX: animate the final card in
-    const observer = new MutationObserver(()=>{
-      if(cardWrap.style.display === 'flex'){
-        const card = document.getElementById('finalCard');
-        card.style.transform = 'translateY(12px) scale(.99)';
-        card.style.opacity = '0';
-        requestAnimationFrame(()=>{card.style.transition='transform 600ms cubic-bezier(.2,.9,.3,1), opacity 600ms';card.style.transform='translateY(0) scale(1)';card.style.opacity='1'});
-      }
-    });
-    observer.observe(cardWrap,{attributes:true,attributeFilter:['style']});
-
-  </script>
-</body>
-</html>
 
